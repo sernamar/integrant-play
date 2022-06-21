@@ -1,11 +1,26 @@
 (ns integrant-play.core
-  (:require [integrant-play.db :refer [get-db select-by-name select-all]])
+  (:require [integrant-play.db :refer [get-db]]
+            [integrant-play.routes :refer [db-routes]]
+            [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+            [ring.adapter.jetty :as jetty]
+            [integrant.core :as ig])
   (:gen-class))
 
-(def db (get-db {:dbtype "sqlite" :dbname "example.db"}))
+(def config
+  (ig/read-string (slurp "config.edn")))
 
-(defn -main
-  ([]
-   (println (select-all db)))
-  ([name]
-   (println (select-by-name db name))))
+(defmethod ig/init-key :database/connection [_ {:keys [dbtype dbname]}]
+  (get-db {:dbtype dbtype
+           :dbname dbname}))
+
+(defmethod ig/init-key :server/handler [_ {:keys [db]}]
+  (-> db
+      db-routes
+      (wrap-json-body {:keywords? true})
+      wrap-json-response))
+
+(defmethod ig/init-key :server/jetty [_ {:keys [handler port]}]
+  (jetty/run-jetty handler {:port port}))
+
+(defn -main [& opts]
+  (ig/init config))

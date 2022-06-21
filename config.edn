@@ -1,0 +1,9 @@
+{:server/jetty
+ {:handler #ig/ref :server/handler
+  :port 8080}
+
+ :server/handler
+ {:db #ig/ref :database/connection}
+
+ :database/connection
+ {:dbtype "sqlite" :dbname "example.db"}}
