@@ -3,7 +3,8 @@
             [integrant-play.routes :refer [all-routes]]
             [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
             [ring.adapter.jetty :as jetty]
-            [integrant.core :as ig])
+            [integrant.core :as ig]
+            [clojure.tools.logging :as log])
   (:gen-class))
 
 (def config
@@ -20,7 +21,9 @@
       wrap-json-response))
 
 (defmethod ig/init-key :server/jetty [_ {:keys [handler port]}]
-  (jetty/run-jetty handler {:port port}))
+  (let [server (jetty/run-jetty handler {:port port})]
+    (log/info "Server running on port" port)
+    server))
 
 (defn -main [& opts]
   (ig/init config))
