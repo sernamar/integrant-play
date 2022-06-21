@@ -1,6 +1,6 @@
 (ns integrant-play.core
   (:require [integrant-play.db :refer [get-db]]
-            [integrant-play.routes :refer [db-routes]]
+            [integrant-play.routes :refer [all-routes]]
             [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
             [ring.adapter.jetty :as jetty]
             [integrant.core :as ig])
@@ -15,7 +15,7 @@
 
 (defmethod ig/init-key :server/handler [_ {:keys [db]}]
   (-> db
-      db-routes
+      all-routes
       (wrap-json-body {:keywords? true})
       wrap-json-response))
 
